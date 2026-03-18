@@ -19,22 +19,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    const prompt = `Du bist B2B Industrieprodukt-Experte für eBay-Listings.
+    const prompt = `Du schreibst eBay-Beschreibungen für Industrieprodukte. 
 
 PRODUKT: ${manufacturer} ${model_or_type}
 Zustand: ${condition}
-Technische Daten/Notizen: ${notes}
+Technische Daten (aus Notizen):
+${notes}
 
-Generiere JSON mit EXAKT diesen Keys:
+AUFGABE: Schreibe JSON mit diesen Keys:
 
 {
-  "title": "Prägnanter Titel (max 80 Zeichen)",
-  "description": "VOLLSTÄNDIGE eBay-Beschreibung, die die technischen Daten aus den Notizen EINGEBAUT enthält (nicht als separater Block, sondern fließend im Text integriert). Mind. 200 Wörter.",
-  "market": "Marktanalyse: Nachfrage, Vergleichspreise, Verkaufsgeschwindigkeit",
-  "price": "Startpreis in Euro (z.B. '110 Euro')"
+  "title": "SNP-X129 Netzteil 24V 5A",
+  "description": "Sie bieten hier auf 1× ${model_or_type}.\n\nDer Artikel ist ${condition}.\nDer aktuelle Marktpreis liegt bei ca. 110 €.\n\nTechnische Daten\n${notes}\n\nHinweis für Fachanwender\nDer Einbau und Betrieb erfordern Fachkenntnisse...",
+  "market": "Marktanalyse...",
+  "price": "110 Euro"
 }
 
-Nur valides JSON!`;
+WICHTIG:
+- Beschreibung beginnt mit "Sie bieten hier auf 1× ${model_or_type}."
+- DANACH kommen ALLE technischen Daten aus den Notizen (unverändert!)
+- Dann die Standard-Hinweise
+- Technische Daten NICHT umschreiben, KOPIEREN!
+- Nur valides JSON!`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -45,7 +51,7 @@ Nur valides JSON!`;
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
+        temperature: 0.3,
         max_tokens: 2000
       })
     });
