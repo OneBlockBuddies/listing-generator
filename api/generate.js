@@ -19,28 +19,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const prompt = `Du schreibst eBay-Beschreibungen für Industrieprodukte. 
+    const prompt = `Du schreibst eBay-Beschreibungen. WICHTIG: Alle technischen Daten MÜSSEN 1:1 aus den Notizen kopiert werden!
 
-PRODUKT: ${manufacturer} ${model_or_type}
-Zustand: ${condition}
-Technische Daten (aus Notizen):
-${notes}
-
-AUFGABE: Schreibe JSON mit diesen Keys:
+Generiere JSON mit EXAKT diesen Keys:
 
 {
-  "title": "SNP-X129 Netzteil 24V 5A",
-  "description": "Sie bieten hier auf 1× ${model_or_type}.\n\nDer Artikel ist ${condition}.\nDer aktuelle Marktpreis liegt bei ca. 110 €.\n\nTechnische Daten\n${notes}\n\nHinweis für Fachanwender\nDer Einbau und Betrieb erfordern Fachkenntnisse...",
-  "market": "Marktanalyse...",
+  "title": "Kurzer prägnanter Titel",
+  "description": "Sie bieten hier auf 1× ${model_or_type}.\n\nDer Artikel ist ${condition}.\nDer aktuelle Marktpreis liegt bei ca. 110 €.\n\nTechnische Daten\n${notes}\n\nHinweis für Fachanwender\nDer Einbau und Betrieb erfordern Fachkenntnisse im Umgang mit elektrischen Anlagen sowie die Beachtung der jeweils geltenden Sicherheits- und Installationsvorschriften.\n\nMengenabgabe\nAlle Artikel werden ausschließlich in den angegebenen Einheiten verkauft.\nEine Abgabe von Teilmengen erfolgt nicht.\n\nWeitere Informationen\nWeitere technische Daten finden Sie in öffentlich zugänglichen Quellen.\nBei Fragen kontaktieren Sie uns bitte vor dem Kauf.\n\nHinweis für EU-Käufer\nRechnungen werden grundsätzlich mit deutscher Umsatzsteuer ausgestellt.\nEine steuerfreie innergemeinschaftliche Lieferung (Reverse-Charge) wird nicht angeboten.",
+  "market": "Marktanalyse: aktuelle Nachfrage, Vergleichspreise",
   "price": "110 Euro"
 }
 
-WICHTIG:
-- Beschreibung beginnt mit "Sie bieten hier auf 1× ${model_or_type}."
-- DANACH kommen ALLE technischen Daten aus den Notizen (unverändert!)
-- Dann die Standard-Hinweise
-- Technische Daten NICHT umschreiben, KOPIEREN!
-- Nur valides JSON!`;
+PRODUKT: ${manufacturer} ${model_or_type}
+
+KRITISCH: Technische Daten aus Notizen MÜSSEN vollständig und unverändert in die description!`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
