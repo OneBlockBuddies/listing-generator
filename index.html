@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="de">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💻⚡ Laptop-Guru's Power App</title>
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #0f1629;
+            --bg-tertiary: #1a1f3a;
+            --neon-cyan: #00f0ff;
+            --neon-purple: #d946ef;
+            --neon-blue: #0ea5e9;
+            --text-primary: #f0f9ff;
+            --text-secondary: #94a3b8;
+            --accent-success: #10b981;
+            --accent-error: #ef4444;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #0d0a1f 100%);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(217, 70, 239, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .logo-section {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .app-title {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .app-subtitle {
+            color: var(--neon-purple);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        /* Input Container */
+        .card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .card.output {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px rgba(217, 70, 239, 0.1);
+            display: none;
+        }
+
+        .card.output.active {
+            display: block;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .card.input.hidden {
+            display: none;
+        }
+
+        /* Form Group */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--neon-cyan);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            color: #000;
+            flex: 1;
+            min-width: 200px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--neon-purple);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(217, 70, 239, 0.1);
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.3);
+        }
+
+        .btn-copy {
+            background: var(--neon-cyan);
+            color: #000;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-copy:hover {
+            background: #00d9ff;
+        }
+
+        /* Output Sections */
+        .output-section {
+            margin-bottom: 25px;
+        }
+
+        .output-section h3 {
+            color: var(--neon-cyan);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .output-section.purple h3 {
+            color: var(--neon-purple);
+        }
+
+        .output-box {
+            background: var(--bg-tertiary);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            word-break: break-word;
+            line-height: 1.8;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+
+        .output-section.purple .output-box {
+            border-color: rgba(217, 70, 239, 0.2);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(0, 240, 255, 0.1);
+            border-left: 3px solid var(--neon-cyan);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .info-box.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--accent-error);
+            color: #fca5a5;
+        }
+
+        .info-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--accent-success);
+            color: #86efac;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 2px solid rgba(0, 240, 255, 0.2);
+            border-top: 2px solid var(--neon-cyan);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { text-shadow: 0 0 20px rgba(0, 240, 255, 0.5); }
+            50% { text-shadow: 0 0 40px rgba(0, 240, 255, 0.8); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 1.4rem;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-primary {
+                min-width: auto;
+            }
+
+            .output-box {
+                max-height: 150px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Price Display */
+        .price-display {
+            font-size: 1.3rem;
+            color: var(--neon-cyan);
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container"><!-- INPUT CARD -->
+   <div class="card input" id="inputCard">
+    <div class="header">
+     <div class="logo-section">
+      🏭⚡
+     </div>
+     <h1 class="app-title">B2B Industrial Listing Generator</h1>
+     <p class="app-subtitle">⚡ Universelle Produkttext-Erstellung für alle Industrieprodukte</p>
+    </div>
+    <div id="inputForm">
+     <div class="form-group"><label for="openaiKey">🔑 OpenAI API Key</label> <input type="text" id="openaiKey" placeholder="sk-..." required>
+     </div>
+     <div class="info-box" style="margin-bottom: 15px;">
+      Rocket Key: <a href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--neon-cyan); text-decoration: underline;">https://platform.openai.com/api-keys</a>
+     </div>
+     <div class="form-group"><label for="manufacturer">🏭 Hersteller</label> <input type="text" id="manufacturer" placeholder="z.B. Siemens, Dell, Phoenix Contact, ABB..." required>
+     </div>
+     <div class="form-group"><label for="model">📦 Modell / Typ / Artikelnummer</label> <input type="text" id="model" placeholder="z.B. 6ES7 136-6BA00-0CA0, XPS 15, PSS67U..." required>
+     </div>
+     <div class="form-group"><label for="condition">✨ Zustand</label> <input type="text" id="condition" placeholder="z.B. Neu, Sehr gut, Gebraucht...">
+     </div>
+     <div class="form-group"><label for="notes">📝 Notizen / Besonderheiten</label> <textarea id="notes" placeholder="RAM, Festplatte, Grafikkarte, Besonderheiten..."></textarea>
+     </div>
+     <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 15px;"><input type="checkbox" id="needsFachhinweis" style="width: 20px; height: 20px; cursor: pointer;"> <label for="needsFachhinweis" style="margin: 0; color: var(--neon-purple); font-weight: 600; cursor: pointer;"> 🔧 Fachanwender-Hinweis erforderlich (Einbau-Produkte wie Module, Netzteile, etc.) </label>
+     </div>
+     <div class="button-group"><button type="button" class="btn-primary" id="generateBtn">⚡ POWER TEXTE ERZEUGEN</button>
+     </div>
+     <div class="info-box" style="margin-top: 15px;">
+      Powered by OpenAI GPT | Lightning Speed Processing
+     </div>
+    </div>
+   </div><!-- OUTPUT CARD -->
+   <div class="card output" id="outputCard">
+    <div class="header">
+     <div class="logo-section">
+      🏭⚡
+     </div>
+     <h1 class="app-title">B2B Industrial Listing Generator</h1>
+     <p class="app-subtitle">✅ Deine generierten Texte</p>
+    </div><!-- Titel Section -->
+    <div class="output-section">
+     <h3>🎯 Titel</h3>
+     <div class="output-box" id="titleOutput"></div><button class="btn-copy" onclick="copyToClipboard('titleOutput')">📋 KOPIEREN</button>
+    </div><!-- Beschreibung Section -->
+    <div class="output-section purple">
+     <h3>📄 Vollständige Beschreibung</h3>
+     <div class="output-box" id="descOutput" style="max-height: 300px;"></div><button class="btn-copy" onclick="copyToClipboard('descOutput')">📋 KOPIEREN</button>
+    </div><!-- Marktanalyse Section -->
+    <div class="output-section">
+     <h3>📊 Marktanalyse &amp; Preisempfehlung</h3>
+     <div class="output-box" id="marketOutput" style="max-height: 250px;"></div><button class="btn-copy" onclick="copyToClipboard('marketOutput')">📋 KOPIEREN</button>
+    </div><!-- Preis Display -->
+    <div class="price-display" id="priceDisplay"></div><!-- Back Button -->
+    <div class="button-group"><button type="button" class="btn-secondary" onclick="showInputCard()" style="flex: 1; min-width: auto;">⬅️ ZURÜCK</button>
+    </div>
+   </div>
+  </div>
+  <script>
+        // Fixed Texts - intelligente Auswahl basierend auf Komponenten
+        const FIX_TEXTS = {
+            fach_netzwerk: "Hinweis für Fachanwender\nDer Einbau und Betrieb von Netzteilen erfordern Fachkenntnisse im Umgang mit elektrischen Anlagen sowie die Beachtung der jeweils geltenden Sicherheits- und Installationsvorschriften.",
+            fach_hardware: "Hinweis für Fachanwender\nDer Einbau von Hardwarekomponenten erfordert Fachkenntnisse. Bitte beachten Sie die Sicherheits- und Installationsvorschriften.",
+            menge: "Mengenabgabe\nAlle Artikel werden ausschließlich in den angegebenen Einheiten verkauft.\nEine Abgabe von Teilmengen erfolgt nicht.",
+            more: "Weitere Informationen\nWeitere technische Daten finden Sie in öffentlich zugänglichen Quellen.\nBei Fragen kontaktieren Sie uns bitte vor dem Kauf.",
+            eu: "Hinweis für EU‑Käufer\nRechnungen werden grundsätzlich mit deutscher Umsatzsteuer ausgestellt.\nEine steuerfreie innergemeinschaftliche Lieferung (Reverse‑Charge) wird nicht angeboten, unabhängig von USt‑ID, Unternehmenssitz oder Kundenstatus."
+        };
+
+        // Prüfe das Kontrollkästchen des Benutzers
+        function userWantsFachhinweis() {
+            return document.getElementById('needsFachhinweis').checked;
+        }
+
+        // Alle Funktionen ZUERST definieren
+        async function generateListing() {
+            const openaiKey = document.getElementById('openaiKey').value.trim();
+            const manufacturer = document.getElementById('manufacturer').value.trim();
+            const model = document.getElementById('model').value.trim();
+
+            if (!openaiKey) {
+                showError('OpenAI API Key erforderlich!');
+                return;
+            }
+
+            if (!manufacturer && !model) {
+                showError('Bitte mindestens Hersteller oder Modell eingeben!');
+                return;
+            }
+
+            const btn = document.querySelector('.btn-primary');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>POWER MODE AKTIVIERT...';
+
+            try {
+                const result = await callOpenAIAPI(openaiKey, {
+                    manufacturer,
+                    model_or_type: model,
+                    condition: document.getElementById('condition').value.trim(),
+                    notes: document.getElementById('notes').value.trim()
+                });
+
+                if (result.error) {
+                    showError(`Fehler: ${result.description_intro}`);
+                } else {
+                    displayResults(result);
+                }
+            } catch (error) {
+                showError(`Fehler: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '⚡ POWER TEXTE ERZEUGEN';
+            }
+        }
+
+        async function callOpenAIAPI(openaiKey, data) {
+            try {
+                // Sende zu deinem Backend (Vercel)
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        manufacturer: data.manufacturer,
+                        model: data.model_or_type,
+                        condition: data.condition,
+                        notes: data.notes,
+                        openaiKey: openaiKey
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error || `HTTP ${response.status}`;
+                    return {
+                        error: true,
+                        description_intro: `Fehler: ${errorMsg}`
+                    };
+                }
+
+                const result = await response.json();
+                
+                // Parse die Antwort vom Backend
+                const titleMatch = result.match(/TITEL:\s*(.+?)(?:\n|$)/);
+                const descMatch = result.match(/BESCHREIBUNG:\s*(.+?)(?=MARKTANALYSE:|$)/s);
+                const marketMatch = result.match(/MARKTANALYSE:\s*(.+?)(?=PREIS:|$)/s);
+                const priceMatch = result.match(/PREIS:\s*(.+?)(?:\n|$)/);
+
+                return {
+                    title: titleMatch ? titleMatch[1].trim().substring(0, 80) : 'Industrieprodukt zu verkaufen',
+                    description_intro: descMatch ? descMatch[1].trim() : 'Qualitativ hochwertiges Industrieprodukt.',
+                    market_analysis: marketMatch ? marketMatch[1].trim() : 'Aktiver Markt.',
+                    price: priceMatch ? priceMatch[1].trim() : '200 Euro',
+                    error: false
+                };
+
+            } catch (error) {
+                return {
+                    error: true,
+                    description_intro: `Fehler: ${error.message}`
+                };
+            }
+        }
+
+        function displayResults(result) {
+            // Titel
+            document.getElementById('titleOutput').textContent = result.title;
+
+            // Beschreibung mit intelligenten festen Blöcken
+            const manufacturer = document.getElementById('manufacturer').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const needsFachhinweis = userWantsFachhinweis();
+            
+            const descParts = [result.description_intro.trim()];
+            
+            // Fachanwender-Hinweis nur wenn Checkbox aktiviert
+            if (needsFachhinweis) {
+                descParts.push('');
+                descParts.push('Hinweis für Fachanwender');
+                descParts.push('Der Einbau und Betrieb erfordern Fachkenntnisse im Umgang mit elektrischen Anlagen sowie die Beachtung der jeweils geltenden Sicherheits‑ und Installationsvorschriften.');
+            }
+            
+            descParts.push('');
+            descParts.push(FIX_TEXTS.menge);
+            descParts.push('');
+            descParts.push(FIX_TEXTS.more);
+            descParts.push('');
+            descParts.push(FIX_TEXTS.eu);
+            
+            const fullDesc = descParts.join('\n');
+            document.getElementById('descOutput').textContent = fullDesc;
+
+            // Marktanalyse
+            document.getElementById('marketOutput').textContent = result.market_analysis;
+
+            // Preis
+            document.getElementById('priceDisplay').textContent = `💰 Empfohlener Startpreis: ${result.price}`;
+
+            // Zeige Output Card
+            showOutputCard();
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('✅ Text kopiert!');
+            }).catch(() => {
+                alert('Kopieren fehlgeschlagen');
+            });
+        }
+
+        function showInputCard() {
+            document.getElementById('inputCard').classList.remove('hidden');
+            document.getElementById('outputCard').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('inputCard').style.display = 'block';
+                document.getElementById('outputCard').style.display = 'none';
+            }, 100);
+        }
+
+        function showOutputCard() {
+            document.getElementById('inputCard').classList.add('hidden');
+            document.getElementById('outputCard').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('inputCard').style.display = 'none';
+                document.getElementById('outputCard').style.display = 'block';
+            }, 100);
+        }
+
+        function showError(message) {
+            const infoBox = document.createElement('div');
+            infoBox.className = 'info-box error';
+            infoBox.textContent = message;
+            document.getElementById('inputForm').prepend(infoBox);
+            setTimeout(() => infoBox.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const infoBox = document.createElement('div');
+            infoBox.className = 'info-box success';
+            infoBox.textContent = message;
+            document.body.prepend(infoBox);
+            setTimeout(() => infoBox.remove(), 3000);
+        }
+
+        // 🎯 Event Listener NACH allen Funktionsdefinitionen!
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('generateBtn');
+            if (btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    generateListing();
+                });
+            }
+        });
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9de57e20c09ec0b5',t:'MTc3Mzg1MDA3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
