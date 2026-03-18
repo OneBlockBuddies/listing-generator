@@ -19,23 +19,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 🔍 STEP 1: Technische Daten aus Internet recherchieren
-    const researchPrompt = `Du bist ein Industrieprodukt-Experte. 
-Recherchiere die EXAKTEN technischen Spezifikationen für:
-Hersteller: ${manufacturer}
-Modell/Artikelnummer: ${model_or_type}
+    // 🔍 STEP 1: Technische Daten AUS DEM INTERNET recherchieren
+    const researchPrompt = `Du bist ein Industrie-Datenbank Experte mit Zugriff auf alle technischen Spezifikationen.
 
-Gib NUR die technischen Daten zurück, die du SICHER kennst (kein Erfinden!):
-- Stromversorgung
-- Abmessungen
-- Gewicht
-- Zertifizierungen
-- Betriebstemperatur
-- Lagernummer/EAN (falls bekannt)
-- Lieferumfang
+PRODUKT: ${manufacturer} ${model_or_type}
+
+Recherchiere die EXAKTEN technischen Spezifikationen aus deinem Wissen:
+- Stromversorgung (Volt, Ampere, Watt)
+- Abmessungen (B×H×T in mm)
+- Gewicht (kg)
+- Zertifizierungen (CE, FCC, etc.)
+- Betriebstemperatur (°C)
+- IP-Schutzklasse
+- Material
+- Gewährleistung/Support
+- Lagernummer oder EAN (falls bekannt)
 - Verwendungszweck
 
-Format: Kurze, prägnante Zeilen ohne Nummern.`;
+WICHTIG: Gib NUR Daten zurück die du SICHER kennst - nicht erfinden!
+Format: Saubere Zeilen ohne Nummern, bereit zum Kopieren in eine eBay-Beschreibung.`;
 
     const researchResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -46,33 +48,37 @@ Format: Kurze, prägnante Zeilen ohne Nummern.`;
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: researchPrompt }],
-        temperature: 0.2,
-        max_tokens: 800
+        temperature: 0.1,
+        max_tokens: 1000
       })
     });
 
-    let technicalSpecs = '';
+    let technicalSpecs = 'Technische Daten verfügbar';
     if (researchResponse.ok) {
       const researchData = await researchResponse.json();
-      technicalSpecs = researchData.choices[0].message.content;
+      technicalSpecs = researchData.choices[0].message.content || 'Technische Daten verfügbar';
     }
 
     // 🔍 STEP 2: Marktpreis & Nachfrage recherchieren
-    const marketPrompt = `Du kennst Industrieprodukte-Märkte.
-${manufacturer} ${model_or_type}
+    const marketPrompt = `Du kennst den B2B-Industriemarkt sehr gut.
 
-Schätze realistisch (basierend auf Kategorie + Zustand):
-1. Typischer Marktpreis (NEU)
-2. Aktueller Marktpreis (${condition})
-3. Nachfrage (hoch/mittel/niedrig)
-4. Verkaufte Stückzahl pro Monat (Schätzung)
+PRODUKT: ${manufacturer} ${model_or_type}
+ZUSTAND: ${condition}
 
-Format JSON:
+Schätze REALISTISCH (basierend auf Kategorie, Hersteller, Zustand):
+
+1. Typischer Neupreis
+2. Aktueller Marktpreis im ${condition}-Zustand
+3. Nachfrage-Level (Sehr Hoch / Hoch / Mittel / Niedrig)
+4. Geschätzte monatliche Verkäufe
+
+Antworte EXAKT in diesem JSON-Format (nichts anderes!):
 {
-  "new_price": "150€",
-  "current_price": "95€",
+  "new_price": "450€",
+  "current_price": "280€",
   "demand": "Hoch",
-  "monthly_sales": "12-18 Stück"
+  "monthly_sales": "15-25 Stück/Monat",
+  "market_notes": "Beliebtes Industrieprodukt, stabile Nachfrage"
 }`;
 
     const marketResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -84,35 +90,45 @@ Format JSON:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: marketPrompt }],
-        temperature: 0.3,
-        max_tokens: 300
+        temperature: 0.2,
+        max_tokens: 400
       })
     });
 
-    let marketData = { new_price: '200€', current_price: '110€', demand: 'Aktiv', monthly_sales: 'Mehrere' };
+    let marketData = {
+      new_price: '200€',
+      current_price: '120€',
+      demand: 'Mittel',
+      monthly_sales: 'Mehrere Stück',
+      market_notes: 'Standard-Nachfrage'
+    };
+
     if (marketResponse.ok) {
       const mData = await marketResponse.json();
       const content = mData.choices[0].message.content;
       try {
-        marketData = JSON.parse(content);
+        marketData = JSON.parse(content.replace(/```json\s?/g, '').replace(/```\s?/g, ''));
       } catch (e) {
-        console.log('Market parse failed, using defaults');
+        console.log('Market parse warning, using defaults');
       }
     }
 
-    // 🔍 STEP 3: EBAY TEXT GENERIEREN mit echten Daten
-    const textPrompt = `Du schreibst professionelle eBay-Industrieprodukt-Beschreibungen.
+    // 🔍 STEP 3: EBAY TEXT GENERIEREN mit ECHTEN Daten
+    const textPrompt = `Du schreibst professionelle, prägnante eBay-Industrieprodukt-Beschreibungen.
 
 PRODUKT: ${manufacturer} ${model_or_type}
 ZUSTAND: ${condition}
-TECHNISCHE DATEN:\n${technicalSpecs}
-NUTZER-NOTIZEN: ${notes || 'keine'}
+NUTZER-NOTIZEN: ${notes || 'Keine zusätzlichen Notizen'}
 
-Generiere VALIDES JSON (kein Markdown!):
+TECHNISCHE DATEN ZUM EINFÜGEN:
+${technicalSpecs}
+
+Generiere VALIDES JSON (kein Markdown, kein Code-Block!):
+
 {
-  "title": "Kurzer prägnanter Titel (max 80 Zeichen)",
-  "description": "Sie bieten hier auf 1× ${model_or_type}...\\n\\nDer Artikel ist ${condition}...\\n\\nTechnische Daten:\\n${technicalSpecs}\\n\\n... (Rest der Beschreibung)",
-  "market_analysis": "Nachfrage: ${marketData.demand}\\nMonatliche Verkäufe: ${marketData.monthly_sales}\\nPreisklasse: ${marketData.current_price} - ${marketData.new_price}",
+  "title": "PRÄGNANTER TITEL MAXIMAL 80 ZEICHEN",
+  "description": "Sie bieten hier auf 1x ${model_or_type}...\\n\\nZustand: ${condition}\\n\\nTechnische Daten:\\n${technicalSpecs}\\n\\n[Weitere Produktbeschreibung]",
+  "market_analysis": "Nachfrage: ${marketData.demand}\\nMonatliche Verkäufe: ${marketData.monthly_sales}\\nPreisklasse: ${marketData.current_price} - ${marketData.new_price}\\n${marketData.market_notes}",
   "price": "${marketData.current_price}"
 }`;
 
@@ -125,14 +141,13 @@ Generiere VALIDES JSON (kein Markdown!):
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: textPrompt }],
-        temperature: 0.4,
-        max_tokens: 2000
+        temperature: 0.5,
+        max_tokens: 2500
       })
     });
 
     if (!textResponse.ok) {
-      const error = await textResponse.json();
-      throw new Error(error.error?.message || 'Text generation failed');
+      throw new Error('Text generation failed');
     }
 
     const textData = await textResponse.json();
@@ -144,7 +159,7 @@ Generiere VALIDES JSON (kein Markdown!):
 
     // Validierung
     if (!result.title || !result.description || !result.market_analysis || !result.price) {
-      throw new Error('Unvollständige Antwort von API');
+      throw new Error('API gab unvollständige Antwort');
     }
 
     return res.status(200).json({
