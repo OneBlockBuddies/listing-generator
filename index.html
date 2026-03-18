@@ -370,7 +370,8 @@
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body>
-  <div class="container"><!-- LOGIN CARD -->
+  <div class="container">
+   <!-- LOGIN CARD -->
    <div class="card input" id="loginCard" style="display: none;">
     <div class="header">
      <div class="logo-section">
@@ -380,9 +381,11 @@
      <p class="app-subtitle">Bitte geben Sie das Passwort ein</p>
     </div>
     <div id="loginForm">
-     <div class="form-group"><label for="passwordInput">🔑 Passwort</label> <input type="password" id="passwordInput" placeholder="Passwort eingeben..." required>
+     <div class="form-group">
+      <label for="passwordInput">🔑 Passwort</label> <input type="password" id="passwordInput" placeholder="Passwort eingeben..." required>
      </div>
-     <div class="button-group"><button type="button" class="btn-primary" id="loginBtn">🔓 ZUGANG FREISCHALTEN</button>
+     <div class="button-group">
+      <button type="button" class="btn-primary" id="loginBtn">🔓 ZUGANG FREISCHALTEN</button>
      </div>
      <div id="loginError"></div>
     </div>
@@ -396,22 +399,29 @@
      <p class="app-subtitle">⚡ Universelle Produkttext-Erstellung für alle Industrieprodukte</p>
     </div>
     <div id="inputForm">
-     <div class="form-group"><label for="openaiKey">🔑 OpenAI API Key</label> <input type="text" id="openaiKey" placeholder="sk-..." required>
+     <div class="form-group">
+      <label for="openaiKey">🔑 OpenAI API Key</label> <input type="text" id="openaiKey" placeholder="sk-..." required>
      </div>
      <div class="info-box" style="margin-bottom: 15px;">
       Rocket Key: <a href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--neon-cyan); text-decoration: underline;">https://platform.openai.com/api-keys</a>
      </div>
-     <div class="form-group"><label for="manufacturer">🏭 Hersteller</label> <input type="text" id="manufacturer" placeholder="z.B. Siemens, Dell, Phoenix Contact, ABB..." required>
+     <div class="form-group">
+      <label for="manufacturer">🏭 Hersteller</label> <input type="text" id="manufacturer" placeholder="z.B. Siemens, Dell, Phoenix Contact, ABB..." required>
      </div>
-     <div class="form-group"><label for="model">📦 Modell / Typ / Artikelnummer</label> <input type="text" id="model" placeholder="z.B. 6ES7 136-6BA00-0CA0, XPS 15, PSS67U..." required>
+     <div class="form-group">
+      <label for="model">📦 Modell / Typ / Artikelnummer</label> <input type="text" id="model" placeholder="z.B. 6ES7 136-6BA00-0CA0, XPS 15, PSS67U..." required>
      </div>
-     <div class="form-group"><label for="condition">✨ Zustand</label> <input type="text" id="condition" placeholder="z.B. Neu, Sehr gut, Gebraucht...">
+     <div class="form-group">
+      <label for="condition">✨ Zustand</label> <input type="text" id="condition" placeholder="z.B. Neu, Sehr gut, Gebraucht...">
      </div>
-     <div class="form-group"><label for="notes">📝 Notizen / Besonderheiten</label> <textarea id="notes" placeholder="RAM, Festplatte, Grafikkarte, Besonderheiten..."></textarea>
+     <div class="form-group">
+      <label for="notes">📝 Notizen / Besonderheiten</label> <textarea id="notes" placeholder="RAM, Festplatte, Grafikkarte, Besonderheiten..."></textarea>
      </div>
-     <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 15px;"><input type="checkbox" id="needsFachhinweis" style="width: 20px; height: 20px; cursor: pointer;"> <label for="needsFachhinweis" style="margin: 0; color: var(--neon-purple); font-weight: 600; cursor: pointer;"> 🔧 Fachanwender-Hinweis erforderlich (Einbau-Produkte wie Module, Netzteile, etc.) </label>
+     <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">
+      <input type="checkbox" id="needsFachhinweis" style="width: 20px; height: 20px; cursor: pointer;"> <label for="needsFachhinweis" style="margin: 0; color: var(--neon-purple); font-weight: 600; cursor: pointer;"> 🔧 Fachanwender-Hinweis erforderlich (Einbau-Produkte wie Module, Netzteile, etc.) </label>
      </div>
-     <div class="button-group"><button type="button" class="btn-primary" id="generateBtn">⚡ POWER TEXTE ERZEUGEN</button>
+     <div class="button-group">
+      <button type="button" class="btn-primary" id="generateBtn">⚡ POWER TEXTE ERZEUGEN</button>
      </div>
      <div class="info-box" style="margin-top: 15px;">
       Powered by OpenAI GPT | Lightning Speed Processing
@@ -439,8 +449,11 @@
      <div class="output-box" id="marketOutput" style="max-height: 250px;"></div><button class="btn-copy" onclick="copyToClipboard('marketOutput')">📋 KOPIEREN</button>
     </div><!-- Preis Display -->
     <div class="price-display" id="priceDisplay"></div><!-- Back Button -->
-    <div class="button-group"><button type="button" class="btn-secondary" onclick="showInputCard()" style="flex: 1; min-width: auto;">⬅️ ZURÜCK</button>
+    <div class="button-group">
+     <button type="button" class="btn-secondary" onclick="showInputCard()" style="flex: 1; min-width: auto;">⬅️ ZURÜCK</button>
     </div>
+   </div><!-- LOGOUT BUTTON (Top Right) -->
+   <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;"><button type="button" class="btn-secondary" id="logoutBtn" style="padding: 8px 16px; font-size: 0.85rem; display: none;">🚪 ABMELDEN</button>
    </div>
   </div>
   <script>
@@ -653,6 +666,8 @@
                 document.getElementById('inputCard').style.display = 'block';
                 document.getElementById('outputCard').style.display = 'none';
             }, 100);
+            // Hide logout button
+            document.getElementById('logoutBtn').style.display = 'none';
         }
 
         function showOutputCard() {
@@ -662,6 +677,8 @@
                 document.getElementById('inputCard').style.display = 'none';
                 document.getElementById('outputCard').style.display = 'block';
             }, 100);
+            // Show logout button
+            document.getElementById('logoutBtn').style.display = 'block';
         }
 
         function showError(message) {
@@ -680,6 +697,16 @@
             setTimeout(() => infoBox.remove(), 3000);
         }
 
+        function handleLogout() {
+            sessionStorage.removeItem('listingAppLoggedIn');
+            document.getElementById('loginCard').style.display = 'block';
+            document.getElementById('inputCard').style.display = 'none';
+            document.getElementById('outputCard').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+            showSuccess('✅ Abgemeldet! Auf Wiedersehen!');
+        }
+
         // 🎯 Event Listener NACH allen Funktionsdefinitionen!
         document.addEventListener('DOMContentLoaded', function() {
             // 🔐 Init Password Protection FIRST!
@@ -692,7 +719,13 @@
                     generateListing();
                 });
             }
+
+            // Logout Button Event Listener
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9de5861e1654c0b5',t:'MTc3Mzg1MDM5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9de59489c3f9c0b5',t:'MTc3Mzg1MDk4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
