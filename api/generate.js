@@ -1,81 +1,82 @@
+// api/generate.js
+import { Anthropic } from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { manufacturer, model_or_type, condition, notes } = req.body;
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({ error: 'OpenAI API Key not configured' });
+  // Nur POST erlaubt
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const prompt = `Du bist ein B2B-Verkautstext-Experte für Industrieprodukte.
+    const { manufacturer, model_or_type, condition, notes } = req.body;
 
-Erstelle einen professionellen Produkttext für:
-- Hersteller: ${manufacturer}
-- Modell/Typ: ${model_or_type}
-- Zustand: ${condition || 'Unbekannt'}
-- Besonderheiten: ${notes || 'Keine angegeben'}
-
-Gib die Antwort als JSON mit genau diesen Feldern zurück:
-{
-  "title": "Kurzer prägnanter Titel (max 80 Zeichen)",
-  "description": "Detaillierte Produktbeschreibung (2-3 Absätze, professionell, verkaufsfördernd)",
-  "market": "Marktanalyse: Verfügbarkeit, Nachfrage, typische Käufer",
-  "price": "Empfohlener Startpreis basierend auf Marktforschung (z.B. '450 Euro' oder '1200-1500 Euro')"
-}`;
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('OpenAI Error:', error);
-      return res.status(response.status).json({ 
-        error: error.error?.message || 'OpenAI API error' 
+    if (!manufacturer && !model_or_type) {
+      return res.status(400).json({
+        error: "Hersteller oder Modell erforderlich",
       });
     }
 
-    const data = await response.json();
-    const content = data.choices[0].message.content;
+    // Prompt für Claude
+    const prompt = `Du bist ein B2B E-Commerce Experte für Industrieprodukte.
+Generiere EXAKT 4 Felder als JSON:
 
-    // Parse JSON aus der OpenAI-Response
+Input:
+- Hersteller: ${manufacturer || "N/A"}
+- Modell/Typ: ${model_or_type || "N/A"}
+- Zustand: ${condition || "Nicht angegeben"}
+- Notizen: ${notes || "Keine"}
+
+Antworte NUR mit diesem JSON-Format (kein zusätzlicher Text):
+{
+  "title": "Prägnanter Titel max 80 Zeichen",
+  "description": "Ausführliche Produktbeschreibung (3-5 Sätze)",
+  "market": "Marktanalyse und Preisempfehlung (2-3 Sätze)",
+  "price": "Empfohlener Startpreis z.B. '899€' oder '150€'"
+}`;
+
+    // Rufe Claude auf
+    const message = await client.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 1024,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
+    // Parse die Response
+    const content = message.content[0].text.trim();
+
+    // Extrahiere JSON (falls Claude Text drumherum macht)
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return res.status(500).json({ error: 'Invalid response format from OpenAI' });
+      throw new Error("Keine gültige JSON in Response");
     }
 
     const result = JSON.parse(jsonMatch[0]);
+
+    // Validiere die Felder
+    if (!result.title || !result.description || !result.market || !result.price) {
+      throw new Error("Fehlende Felder in der Response");
+    }
 
     return res.status(200).json({
       title: result.title,
       description: result.description,
       market: result.market,
-      price: result.price
+      price: result.price,
     });
-
   } catch (error) {
-    console.error('Server Error:', error);
-    return res.status(500).json({ 
-      error: error.message || 'Internal server error' 
+    console.error("Generate API Error:", error);
+
+    return res.status(500).json({
+      error: error.message || "API Fehler bei der Generierung",
     });
   }
 }
