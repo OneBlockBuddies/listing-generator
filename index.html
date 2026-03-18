@@ -370,7 +370,23 @@
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body>
-  <div class="container"><!-- INPUT CARD -->
+  <div class="container"><!-- LOGIN CARD -->
+   <div class="card input" id="loginCard" style="display: none;">
+    <div class="header">
+     <div class="logo-section">
+      🔐
+     </div>
+     <h1 class="app-title">Zugang erforderlich</h1>
+     <p class="app-subtitle">Bitte geben Sie das Passwort ein</p>
+    </div>
+    <div id="loginForm">
+     <div class="form-group"><label for="passwordInput">🔑 Passwort</label> <input type="password" id="passwordInput" placeholder="Passwort eingeben..." required>
+     </div>
+     <div class="button-group"><button type="button" class="btn-primary" id="loginBtn">🔓 ZUGANG FREISCHALTEN</button>
+     </div>
+     <div id="loginError"></div>
+    </div>
+   </div><!-- INPUT CARD -->
    <div class="card input" id="inputCard">
     <div class="header">
      <div class="logo-section">
@@ -428,6 +444,58 @@
    </div>
   </div>
   <script>
+        // 🔐 PASSWORD PROTECTION - Sicher über Backend!
+        
+        function initPasswordProtection() {
+            const isLoggedIn = sessionStorage.getItem('listingAppLoggedIn');
+            if (!isLoggedIn) {
+                document.getElementById('loginCard').style.display = 'block';
+                document.getElementById('inputCard').style.display = 'none';
+                document.getElementById('outputCard').style.display = 'none';
+                document.getElementById('loginBtn').addEventListener('click', handleLogin);
+                document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
+        }
+
+        async function handleLogin() {
+            const password = document.getElementById('passwordInput').value;
+            const btn = document.getElementById('loginBtn');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Prüfe Passwort...';
+
+            try {
+                // 🔒 Sende Passwort zum Backend zur Prüfung
+                const response = await fetch('/api/verify-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    sessionStorage.setItem('listingAppLoggedIn', 'true');
+                    document.getElementById('loginCard').style.display = 'none';
+                    document.getElementById('inputCard').style.display = 'block';
+                    document.getElementById('passwordInput').value = '';
+                } else {
+                    const errorDiv = document.getElementById('loginError');
+                    errorDiv.innerHTML = '<div class="info-box error">❌ Falsches Passwort!</div>';
+                    setTimeout(() => errorDiv.innerHTML = '', 3000);
+                }
+            } catch (error) {
+                const errorDiv = document.getElementById('loginError');
+                errorDiv.innerHTML = '<div class="info-box error">❌ Fehler beim Verbinden!</div>';
+                console.error('Login error:', error);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔓 ZUGANG FREISCHALTEN';
+            }
+        }
+
         // Fixed Texts - intelligente Auswahl basierend auf Komponenten
         const FIX_TEXTS = {
             fach_netzwerk: "Hinweis für Fachanwender\nDer Einbau und Betrieb von Netzteilen erfordern Fachkenntnisse im Umgang mit elektrischen Anlagen sowie die Beachtung der jeweils geltenden Sicherheits- und Installationsvorschriften.",
@@ -614,6 +682,9 @@
 
         // 🎯 Event Listener NACH allen Funktionsdefinitionen!
         document.addEventListener('DOMContentLoaded', function() {
+            // 🔐 Init Password Protection FIRST!
+            initPasswordProtection();
+            
             const btn = document.getElementById('generateBtn');
             if (btn) {
                 btn.addEventListener('click', function(e) {
@@ -623,5 +694,5 @@
             }
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9de57e20c09ec0b5',t:'MTc3Mzg1MDA3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9de5861e1654c0b5',t:'MTc3Mzg1MDM5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
